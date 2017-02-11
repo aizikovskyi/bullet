@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <style type="text/css">
+canvas {
+  image-rendering: optimizeSpeed;             /* Older versions of FF          */
+  image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
+  image-rendering: -webkit-optimize-contrast; /* Safari                        */
+  image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+  image-rendering: pixelated;                 /* Awesome future-browsers       */
+  -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+}
+    </style>
+    <script type="text/javascript" src="videoengine.js"></script>
+    <script type="text/javascript" src="canvasinputengine.js"></script>
+    <script type="text/javascript" src="spriteobject.js"></script>
+    <script type="text/javascript" src="gamecontroller.js"></script>
+    <script>
+      function onLoad() {
+
+
+        VideoEngine.initWithCanvas(videoCanvas);
+        VideoEngine.updateSize();
+
+        window.onresize = () => {
+          videoCanvas.width = window.innerWidth - 10;
+          videoCanvas.height = window.innerHeight - 10;
+          VideoEngine.updateSize();
+        };
+
+        let canvasInputEngine = new CanvasInputEngine(videoCanvas, VideoEngine);
+
+        let gameController = new GameController(VideoEngine, canvasInputEngine);
+        gameController.startStage(1);
+      }
+    </script>
+  </head>
+  <body onload="onLoad()">
+    <canvas id="videoCanvas" width="300px" height="400px" style="background-color:black"/>
+  </body>
+</html>
