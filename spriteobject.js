@@ -10,8 +10,8 @@ class MovingObject {
   }
 
   intersectsPoint(point) {
-    const distanceSquared = ((point.x - this.x) ** 2) + ((point.y - this.y) ** 2);
-    return distanceSquared <= this.radius ** 2;
+    const distanceSquared = Math.pow(point.x - this.x, 2) + Math.pow(point.y - this.y, 2);
+    return distanceSquared <= Math.pow(this.radius, 2);
   }
 
   moveAndUpdateVelocity(gameState) {
@@ -21,8 +21,17 @@ class MovingObject {
 
   shouldRemain(gameState) {
     const fitsWidth = (this.x > -this.radius) && (this.x < gameState.fieldDimensions.width + this.radius);
-    const fitsHeight = (this.y > -this.radius) && (this.y < gameState.fieldDimensions.height + this.radius);
+    const fitsHeight = /* (this.y > -this.radius) && */ (this.y < gameState.fieldDimensions.height + this.radius);
     return fitsWidth && fitsHeight;
+  }
+
+  unitVectorTowards(point) {
+    const dx = point.x - this.x;
+    const dy = point.y - this.y;
+    //if (dx <= this.radius && dy <= this.radius) return { x: 0, y: 0 };
+    const length = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    if (length === 0) return { x: 0, y: 0 };
+    return { x: dx / length, y: dy / length };
   }
 }
 
@@ -37,16 +46,17 @@ class SimpleBullet extends MovingObject {
 class PlayerObject extends MovingObject {
   constructor(x, y, initialVelocity, birthFrame) {
     super(x, y, initialVelocity, birthFrame);
-    this.radius = 10;
+    this.radius = 1;
   }
 
   moveTowards(targetPoint) {
-    const x = targetPoint.x;
-    const y = targetPoint.y;
-    // dumb code for now. will be fixed later
-    if (this.x < x) this.x += 3;
-    if (this.x > x) this.x -= 3;
-    if (this.y < y) this.y += 3;
-    if (this.y > y) this.y -= 3;
+    const vector = this.unitVectorTowards(targetPoint);
+    this.x += vector.x * 3;
+    this.y += vector.y * 3;
+    // if (vector.y < 0) {
+    //   this.y += vector.y * 4;
+    // } else {
+    //   this.y += vector.y * 2;
+    // }
   }
 }

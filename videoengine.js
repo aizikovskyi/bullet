@@ -42,8 +42,12 @@ window.VideoEngine = (function makeVideoEngine() {
   }
 
   function clearViewbox() {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, viewboxWidth, viewboxHeight);
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+    // ctx.fillStyle = 'blue';
+    // ctx.fillRect(0, 0, viewboxWidth, viewboxHeight);
   }
 
   function initWithCanvas(canvasElt) {
@@ -70,7 +74,17 @@ window.VideoEngine = (function makeVideoEngine() {
   // this does not take scaling into account. must be resolved
   function canvasPointToGameCoords(x, y) {
     const rect = canvas.getBoundingClientRect();
-    return { x: x - rect.left, y: y - rect.top };
+    const viewboxX = x - rect.left - offsetX;
+    const viewboxY = y - rect.top - offsetY;
+    let scaledViewboxX = viewboxX / scaleFactor;
+    let scaledViewboxY = viewboxY / scaleFactor;
+
+    if (scaledViewboxX < 0) scaledViewboxX = 0;
+    if (scaledViewboxY < 0) scaledViewboxY = 0;
+    if (scaledViewboxX > viewboxWidth) scaledViewboxX = viewboxWidth;
+    if (scaledViewboxY > viewboxHeight) scaledViewboxY = viewboxHeight;
+
+    return { x: scaledViewboxX, y: scaledViewboxY };
   }
 
   return {

@@ -1,9 +1,10 @@
 class SomeBasicStageController {
   tick(gameState) {
-    if (Math.random() < 0.1) {
+    if (Math.random() < 0.4) {
       const xPos = Math.round(Math.random() * gameState.fieldDimensions.width);
-      const velocity = { x: 0, y: 10 };
-      const newEnemy = new SimpleBullet(xPos, 0, velocity, gameState.frame);
+
+      const velocity = { x: Math.random() * 0.4 - 0.2, y: 2.5 + Math.random() };
+      const newEnemy = new SimpleBullet(xPos, -10, velocity, gameState.frame);
       gameState.objects.push(newEnemy);
     }
   }
@@ -35,9 +36,11 @@ class GameController {
       fieldDimensions: { width: 300, height: 400 },
       objects: [],
       frame: 0,
+      fps: 30,
       lastFrame: -1,
-      status: 'running',        // 'paused', 'finished'
-      playerStatus: 'alive',    // 'dead', 'invulnerable'
+      lastFrameDate: Date.now(),
+      status: 'running',        // 'running', 'paused', 'finished'
+      playerStatus: 'alive',    // 'alive', 'dead', 'invulnerable'
       playerInput: {
         movementTarget: null,
         movementActive: false,
@@ -56,7 +59,8 @@ class GameController {
     this.stageController = GameController.stageControllerForStage(stage);
     this.videoEngine.clearViewbox();
 
-    this.mainInterval = window.setInterval(() => this.mainLoop(), 1000 / 30);
+    this.mainInterval = window.setInterval(() => this.mainLoop(), 1000 / this.gameState.fps);
+    this.drawLoop();
   }
 
   mainLoop() {
@@ -65,7 +69,13 @@ class GameController {
       window.clearInterval(this.mainLoopInterval);
     }
     this.tick();
+  }
+
+  drawLoop() {
+    if (this.gameState.status === 'finished') return;
+
     this.draw();
+    window.requestAnimationFrame(() => this.drawLoop());
   }
 
   tick() {
@@ -107,13 +117,14 @@ class GameController {
     });
 
     // Check if objects can be removed
-    this.gameState.objects.filter(obj => obj.shouldRemain(this.gameState));
+    this.gameState.objects = this.gameState.objects.filter(obj => obj.shouldRemain(this.gameState));
 
     // Create new objects if any
     this.stageController.tick(this.gameState);
 
     // increment frame number
     this.gameState.frame += 1;
+    this.gameState.lastFrameDate = Date.now();
 
     // finally, end the game if needed
     if (this.gameState.frame === this.gameState.lastFrame) {
@@ -122,9 +133,14 @@ class GameController {
   }
 
   draw() {
+    const timeDelta = Date.now() - this.gameState.lastFrameDate;
+    const frameDelta = timeDelta * this.gameState.fps / 1000;
+
     this.videoEngine.clearViewbox();
     this.gameState.objects.forEach((obj) => {
-      this.videoEngine.drawCircle(Math.round(obj.x), Math.round(obj.y), obj.radius, 'white');
+      const adjustedX = obj.x + (obj.velocity.x * frameDelta);
+      const adjustedY = obj.y + (obj.velocity.y * frameDelta);
+      this.videoEngine.drawCircle(Math.round(adjustedX), Math.round(adjustedY), obj.radius, 'white');
     });
     if (this.gameState.playerStatus !== 'dead') {
       this.videoEngine.drawCircle(Math.round(this.gameState.playerObject.x), Math.round(this.gameState.playerObject.y), 3, 'red');
