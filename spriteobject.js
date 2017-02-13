@@ -47,16 +47,19 @@ class PlayerObject extends MovingObject {
   constructor(x, y, initialVelocity, birthFrame) {
     super(x, y, initialVelocity, birthFrame);
     this.radius = 1;
+    this.speed = 3;
   }
 
   moveTowards(targetPoint) {
-    const vector = this.unitVectorTowards(targetPoint);
-    this.x += vector.x * 3;
-    this.y += vector.y * 3;
-    // if (vector.y < 0) {
-    //   this.y += vector.y * 4;
-    // } else {
-    //   this.y += vector.y * 2;
-    // }
+    this.x += this.velocity.x;
+    this.y += this.velocity.y;
+    if (targetPoint) {
+      const vector = this.unitVectorTowards(targetPoint);
+      this.velocity.x = vector.x * this.speed;
+      this.velocity.y = vector.y * this.speed;
+    } else {
+      this.velocity.x = 0;
+      this.velocity.y = 0;
+    }
   }
 }

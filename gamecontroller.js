@@ -3,8 +3,9 @@ class SomeBasicStageController {
     if (Math.random() < 0.4) {
       const xPos = Math.round(Math.random() * gameState.fieldDimensions.width);
 
-      const velocity = { x: Math.random() * 0.4 - 0.2, y: 2.5 + Math.random() };
+      const velocity = { x: Math.random() * 0.4 - 0.2, y: 3.5 + Math.random() };
       const newEnemy = new SimpleBullet(xPos, -10, velocity, gameState.frame);
+      newEnemy.radius = Math.round(3 + Math.random() * 10);
       gameState.objects.push(newEnemy);
     }
   }
@@ -100,6 +101,8 @@ class GameController {
     // Move the player object according to input
     if (this.gameState.playerInput.movementActive) {
       this.gameState.playerObject.moveTowards(this.gameState.playerInput.movementTarget);
+    } else {
+      this.gameState.playerObject.moveTowards(null);
     }
 
     // Then, for each enemy object:
@@ -135,7 +138,11 @@ class GameController {
   draw() {
     const timeDelta = Date.now() - this.gameState.lastFrameDate;
     const frameDelta = timeDelta * this.gameState.fps / 1000;
-
+    if (frameDelta > 2) {
+      // the game was paused? user switched to a different app?
+      // either way, we can't draw from such stale data
+      return;
+    }
     this.videoEngine.clearViewbox();
     this.gameState.objects.forEach((obj) => {
       const adjustedX = obj.x + (obj.velocity.x * frameDelta);
@@ -143,7 +150,9 @@ class GameController {
       this.videoEngine.drawCircle(Math.round(adjustedX), Math.round(adjustedY), obj.radius, 'white');
     });
     if (this.gameState.playerStatus !== 'dead') {
-      this.videoEngine.drawCircle(Math.round(this.gameState.playerObject.x), Math.round(this.gameState.playerObject.y), 3, 'red');
+      const adjustedPlayerX = this.gameState.playerObject.x + (this.gameState.playerObject.velocity.x * frameDelta);
+      const adjustedPlayerY = this.gameState.playerObject.y + (this.gameState.playerObject.velocity.y * frameDelta);
+      this.videoEngine.drawCircle(Math.round(adjustedPlayerX), Math.round(adjustedPlayerY), 3, 'red');
     }
     this.videoEngine.update();
   }
