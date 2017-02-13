@@ -90,9 +90,13 @@ class GameController {
   }
 
   startGame() {
-    this.menuEngine.showPopup('START GAME', () => {
+    const fullscreenItem = MenuEngine.menuItem('TOGGLE FULLSCREEN', false, () => {
+      toggleFullScreen();
+    });
+    const startGameItem = MenuEngine.menuItem('START GAME', true, () => {
       this.startStage(1);
     });
+    this.menuEngine.showMenu([fullscreenItem, startGameItem]);
   }
 
   startStage(stage) {

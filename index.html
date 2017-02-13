@@ -9,6 +9,21 @@
     <script type="text/javascript" src="spriteobject.js"></script>
     <script type="text/javascript" src="gamecontroller.js"></script>
     <script>
+      function toggleFullScreen() {
+        var doc = window.document;
+        var docEl = doc.documentElement;
+
+        var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+        var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+        if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+          requestFullScreen.call(docEl);
+        }
+        else {
+          cancelFullScreen.call(doc);
+        }
+      }
+
       function onLoad() {
 
 
@@ -29,7 +44,7 @@
       }
     </script>
   </head>
-  <body onload="onLoad()">
+  <body style="background-color:black" onload="onLoad()">
     <canvas id="videoCanvas" width="300px" height="400px" style="background-color:black"/>
   </body>
 </html>

@@ -1,6 +1,10 @@
 /* eslint-env browser */
 
 class MenuEngine {
+  static menuItem(text, shouldCloseMenu, callback) {
+    return { text, callback, shouldCloseMenu };
+  }
+
   constructor(parentElement) {
     this.parentElement = parentElement;
   }
@@ -36,5 +40,30 @@ class MenuEngine {
     };
     popupDiv.addEventListener('mousedown', dismissHandler);
     popupDiv.addEventListener('touchstart', dismissHandler);
+  }
+
+  showMenu(menuItems) {
+    const menuDivs = [];
+    for (let i = 0; i < menuItems.length; i++) {
+      const popupDiv = document.createElement('div');
+      const menuItem = menuItems[i];
+      popupDiv.style.width = `${this.parentElement.offsetWidth}px`;
+      popupDiv.style.height = '100px';
+      popupDiv.style.position = 'absolute';
+      popupDiv.style.left = '0px';
+      popupDiv.style.top = `${100 + (i * 110)}px`;
+      popupDiv.style['background-color'] = '#555555';
+      popupDiv.innerHTML = `<p style='text-align:center; color:white'>${menuItem.text}</p>`;
+      this.parentElement.appendChild(popupDiv);
+      const dismissHandler = (evt) => {
+        if (menuItem.shouldCloseMenu) {
+          menuDivs.forEach(div => this.parentElement.removeChild(div));
+        }
+        menuItem.callback();
+      };
+      popupDiv.addEventListener('mousedown', dismissHandler);
+      popupDiv.addEventListener('touchstart', dismissHandler);
+      menuDivs.push(popupDiv);
+    }
   }
 }
