@@ -7,6 +7,7 @@ class MovingObject {
     this.boundaryType = 0;
     this.radius = 0;
     this.deadly = false;
+    this.color = 'blue';
   }
 
   intersectsPoint(point) {
@@ -36,10 +37,11 @@ class MovingObject {
 }
 
 class SimpleBullet extends MovingObject {
-  constructor(x, y, initialVelocity, birthFrame) {
+  constructor(x, y, initialVelocity, birthFrame, color) {
     super(x, y, initialVelocity, birthFrame);
     this.radius = 10;
     this.deadly = true;
+    this.color = color;
   }
 }
 
@@ -47,7 +49,7 @@ class PlayerObject extends MovingObject {
   constructor(x, y, initialVelocity, birthFrame) {
     super(x, y, initialVelocity, birthFrame);
     this.radius = 1;
-    this.speed = 3;
+    this.speed = 5;
   }
 
   moveTowards(targetPoint) {

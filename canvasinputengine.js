@@ -83,7 +83,7 @@ class CanvasInputEngine {
         const touch = evt.changedTouches[i];
         for (let j = 0; j < this.activeTouchStack.length; j++) {
           const storedTouch = this.activeTouchStack[j];
-          if (touch.identifier === storedTouch.identifier) {
+          if (touch.identifier === storedTouch.id) {
             storedTouch.x = touch.clientX;
             storedTouch.y = touch.clientY;
             if (j === this.activeTouchStack.length - 1) {

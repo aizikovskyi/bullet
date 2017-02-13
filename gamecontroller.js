@@ -1,20 +1,54 @@
 class SomeBasicStageController {
+  rampedPhase(gameState, startTimeInSeconds, endTimeInSeconds, startProbability, endProbability, block) {
+    const timeInSeconds = gameState.frame / gameState.fps;
+    if (timeInSeconds >= startTimeInSeconds && timeInSeconds < endTimeInSeconds) {
+      const normalizedTime = (timeInSeconds - startTimeInSeconds) / (endTimeInSeconds - startTimeInSeconds);
+      const probability = (startProbability * (1 - normalizedTime)) + (endProbability * normalizedTime);
+      if (Math.random() < probability) {
+        block();
+      }
+    }
+  }
+
   tick(gameState) {
-    if (Math.random() < 0.4) {
+    if (gameState.frame > 45 * gameState.fps) {
+      gameState.status = 'finished';
+      return;
+    }
+    this.rampedPhase(gameState, 0, 10, 0.1, 0.3, () => {
       const xPos = Math.round(Math.random() * gameState.fieldDimensions.width);
 
       const velocity = { x: Math.random() * 0.4 - 0.2, y: 3.5 + Math.random() };
-      const newEnemy = new SimpleBullet(xPos, -10, velocity, gameState.frame);
+      const newEnemy = new SimpleBullet(xPos, -10, velocity, gameState.frame, 'white');
       newEnemy.radius = Math.round(3 + Math.random() * 10);
       gameState.objects.push(newEnemy);
-    }
+    });
+    this.rampedPhase(gameState, 10, 40, 0.3, 0.1, () => {
+      const xPos = Math.round(Math.random() * gameState.fieldDimensions.width);
+
+      const velocity = { x: Math.random() * 0.4 - 0.2, y: 3.5 + Math.random() };
+      const newEnemy = new SimpleBullet(xPos, -10, velocity, gameState.frame, 'white');
+      newEnemy.radius = Math.round(3 + Math.random() * 10);
+      gameState.objects.push(newEnemy);
+    });
+    this.rampedPhase(gameState, 20, 40, 0.0, 0.1, () => {
+      const xPos = Math.round(Math.random() * gameState.fieldDimensions.width);
+      const velocity = { x: 0, y: 0 };
+      const newEnemy = new SimpleBullet(xPos, -10, velocity, gameState.frame, 'yellow');
+      newEnemy.radius = 3;
+      const newVelocity = newEnemy.unitVectorTowards(gameState.playerObject);
+      newEnemy.velocity.x = newVelocity.x * 6;
+      newEnemy.velocity.y = newVelocity.y * 6;
+      gameState.objects.push(newEnemy);
+    });
   }
 }
 
 class GameController {
-  constructor(videoEngine, canvasInputEngine) {
+  constructor(videoEngine, canvasInputEngine, menuEngine) {
     this.videoEngine = videoEngine;
     this.canvasInputEngine = canvasInputEngine;
+    this.menuEngine = menuEngine;
     this.gameState = null;
     this.stageController = null;
     this.mainLoopInterval = null;
@@ -55,19 +89,31 @@ class GameController {
     return new SomeBasicStageController();
   }
 
+  startGame() {
+    this.menuEngine.showPopup('START GAME', () => {
+      this.startStage(1);
+    });
+  }
+
   startStage(stage) {
     this.gameState = GameController.emptyGameState();
     this.stageController = GameController.stageControllerForStage(stage);
     this.videoEngine.clearViewbox();
 
-    this.mainInterval = window.setInterval(() => this.mainLoop(), 1000 / this.gameState.fps);
+    this.mainLoopInterval = window.setInterval(() => this.mainLoop(), 1000 / this.gameState.fps);
     this.drawLoop();
+    this.menuEngine.showMessage(`STAGE ${stage} BEGIN`, 3);
   }
 
   mainLoop() {
     // for now, tick and draw are called together. In principle they can be called separately.
     if (this.gameState.status === 'finished') {
       window.clearInterval(this.mainLoopInterval);
+      if (this.gameState.playerStatus === 'dead') {
+        this.startGame();
+      } else {
+        this.startStage(1);
+      }
     }
     this.tick();
   }
@@ -113,7 +159,6 @@ class GameController {
       // Check for collision and adjust player status accordingly
       if (obj.deadly && this.gameState.playerStatus === 'alive' &&
           obj.intersectsPoint(this.gameState.playerObject)) {
-        // BOOM!
         this.gameState.playerStatus = 'dead';
         this.gameState.lastFrame = this.gameState.frame + 30;
       }
@@ -147,7 +192,7 @@ class GameController {
     this.gameState.objects.forEach((obj) => {
       const adjustedX = obj.x + (obj.velocity.x * frameDelta);
       const adjustedY = obj.y + (obj.velocity.y * frameDelta);
-      this.videoEngine.drawCircle(Math.round(adjustedX), Math.round(adjustedY), obj.radius, 'white');
+      this.videoEngine.drawCircle(Math.round(adjustedX), Math.round(adjustedY), obj.radius, obj.color);
     });
     if (this.gameState.playerStatus !== 'dead') {
       const adjustedPlayerX = this.gameState.playerObject.x + (this.gameState.playerObject.velocity.x * frameDelta);
@@ -156,6 +201,4 @@ class GameController {
     }
     this.videoEngine.update();
   }
-
-
 }

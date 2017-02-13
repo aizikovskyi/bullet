@@ -5,6 +5,7 @@
     </style>
     <script type="text/javascript" src="videoengine.js"></script>
     <script type="text/javascript" src="canvasinputengine.js"></script>
+    <script type="text/javascript" src="menuengine.js"></script>
     <script type="text/javascript" src="spriteobject.js"></script>
     <script type="text/javascript" src="gamecontroller.js"></script>
     <script>
@@ -22,9 +23,9 @@
         window.onresize();
 
         let canvasInputEngine = new CanvasInputEngine(videoCanvas, VideoEngine);
-
-        let gameController = new GameController(VideoEngine, canvasInputEngine);
-        gameController.startStage(1);
+        let menuEngine = new MenuEngine(document.documentElement);
+        let gameController = new GameController(VideoEngine, canvasInputEngine, menuEngine);
+        gameController.startGame();
       }
     </script>
   </head>
