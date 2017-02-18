@@ -1,100 +1,123 @@
-/* eslint-env browser */
+class VideoEngine {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.context = canvas.getContext('2d');
+    this.untransformedContext = canvas.getContext('2d');
+    this.playfieldWidth = 100;
+    this.maxPlayfieldHeight = 180;
+    this.minPlayfieldHeight = 130;
 
-window.VideoEngine = (function makeVideoEngine() {
-  let canvas;
-  let ctx;
-  let scaleFactor;
-  let offsetX;
-  let offsetY;
-  let viewboxWidth = 300;
-  let viewboxHeight = 400;
+    // dummy values:
+    this.offsetX = 0;  // offset values are in canvas pixels!
+    this.offsetY = 0;
+    this.scaleFactor = 1;
+    this.playfieldHeight = 100;
+    this.topBottomMargins = false;
+    this.leftRightMargins = false;
+  }
 
-  function updateSize() {
-    const width = canvas.width;
-    const height = canvas.height;
-    // console.log(`width: ${width}; height: ${height}`);
-    // console.log(`viewboxWidth: ${viewboxWidth}; viewboxHeight: ${viewboxHeight}`);
+  updateSize() {
+    const width = this.canvas.width;
+    const height = this.canvas.height;
 
-    scaleFactor = Math.min(Math.floor(width / viewboxWidth),
-                           Math.floor(height / viewboxHeight));
+    this.offsetX = 0;
+    this.offsetY = 0;
+    this.topBottomMargins = false;
+    this.leftRightMargins = false;
 
-    // console.log(`scaleFactor: ${scaleFactor}`);
+    const widthScaleFactor = width / this.playfieldWidth;
+    const naivePlayfieldHeight = height / widthScaleFactor;
 
-    if (scaleFactor === 0) {
-      console.log('Error: viewbox doesn\'t fit');
-      scaleFactor = 1;
+    if (naivePlayfieldHeight > this.maxPlayfieldHeight) {
+      this.topBottomMargins = true;
+      this.playfieldHeight = this.maxPlayfieldHeight;
+      this.offsetY = (height - (this.maxPlayfieldHeight * widthScaleFactor)) / 2;
+      this.scaleFactor = widthScaleFactor;
+    } else
+    if (naivePlayfieldHeight < this.minPlayfieldHeight) {
+      this.leftRightMargins = true;
+      const heightScaleFactor = height / this.minPlayfieldHeight;
+      this.playfieldHeight = this.minPlayfieldHeight;
+      this.offsetX = (width - (this.playfieldWidth * heightScaleFactor)) / 2;
+      this.scaleFactor = heightScaleFactor;
+    } else {
+      this.playfieldHeight = height / widthScaleFactor;
+      this.scaleFactor = widthScaleFactor;
     }
-    offsetX = Math.round((width - (viewboxWidth * scaleFactor)) / 2);
-    offsetY = Math.round((height - (viewboxHeight * scaleFactor)) / 2);
-    // console.log(`offsetX: ${offsetX}; offsetY: ${offsetY}`);
 
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, width, height);
-
-    ctx.translate(offsetX, offsetY);
-    ctx.scale(scaleFactor, scaleFactor);
+    this.context.setTransform(1, 0, 0, 1, 0, 0);
+    this.context.clearRect(0, 0, width, height);
+    this.context.translate(this.offsetX, this.offsetY);
+    this.context.scale(this.scaleFactor, this.scaleFactor);
   }
 
-  function setViewbox(width, height) {
-    viewboxWidth = width;
-    viewboxHeight = height;
-    updateSize();
+  clearCanvas() {
+    this.context.save();
+    this.context.setTransform(1, 0, 0, 1, 0, 0);
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.restore();
   }
 
-  function clearViewbox() {
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.restore();
-    // ctx.fillStyle = 'blue';
-    // ctx.fillRect(0, 0, viewboxWidth, viewboxHeight);
-  }
-
-  function initWithCanvas(canvasElt) {
-    canvas = canvasElt;
-    ctx = canvas.getContext('2d');
-    updateSize();
-  }
-
-  function drawPixel(x, y) {
-    ctx.fillStyle = 'white';
-    ctx.fillRect(x, y, 1, 1);
-  }
-
-  function drawCircle(x, y, radius, color) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2, false);
-    ctx.fill();
-  }
-
-  function update() {
-  }
-
-  // this does not take scaling into account. must be resolved
-  function canvasPointToGameCoords(x, y) {
-    const rect = canvas.getBoundingClientRect();
-    const viewboxX = x - rect.left - offsetX;
-    const viewboxY = y - rect.top - offsetY;
-    let scaledViewboxX = viewboxX / scaleFactor;
-    let scaledViewboxY = viewboxY / scaleFactor;
+  canvasPointToGameCoords(x, y) {
+    const rect = this.canvas.getBoundingClientRect();
+    const viewboxX = x - rect.left - this.offsetX;
+    const viewboxY = y - rect.top - this.offsetY;
+    let scaledViewboxX = viewboxX / this.scaleFactor;
+    let scaledViewboxY = viewboxY / this.scaleFactor;
 
     if (scaledViewboxX < 0) scaledViewboxX = 0;
     if (scaledViewboxY < 0) scaledViewboxY = 0;
-    if (scaledViewboxX > viewboxWidth) scaledViewboxX = viewboxWidth;
-    if (scaledViewboxY > viewboxHeight) scaledViewboxY = viewboxHeight;
+    if (scaledViewboxX > this.playfieldWidth) scaledViewboxX = this.playfieldWidth;
+    if (scaledViewboxY > this.playfieldHeight) scaledViewboxY = this.playfieldHeight;
 
     return { x: scaledViewboxX, y: scaledViewboxY };
   }
+  drawCircle(x, y, radius, color) {
+    this.context.fillStyle = color;
+    this.context.beginPath();
+    this.context.arc(x, y, radius, 0, Math.PI * 2, false);
+    this.context.fill();
+  }
 
-  return {
-    initWithCanvas,
-    clearViewbox,
-    setViewbox,
-    updateSize,
-    drawPixel,
-    drawCircle,
-    update,
-    canvasPointToGameCoords,
-  };
-}());
+  startFrame() {
+    this.context.clearRect(0, 0, this.playfieldWidth, this.playfieldHeight);
+  }
+
+  endFrame() {
+    if (this.leftRightMargins) {
+      this.context.save();
+      this.context.setTransform(1, 0, 0, 1, 0, 0);
+      this.context.clearRect(0, 0, this.offsetX, this.canvas.height);
+      this.context.clearRect(this.canvas.width - this.offsetX, 0, this.offsetX, this.canvas.height);
+
+      this.context.strokeStyle = '#777777';
+      this.context.beginPath();
+      this.context.moveTo(this.offsetX, this.offsetY);
+      this.context.lineTo(this.offsetX, this.canvas.height - this.offsetY);
+      this.context.moveTo(this.canvas.width - this.offsetX, this.offsetY);
+      this.context.lineTo(this.canvas.width - this.offsetX, this.canvas.height - this.offsetY);
+      this.context.stroke();
+
+      this.context.restore();
+
+    }
+
+    if (this.topBottomMargins) {
+      this.context.save();
+      this.context.setTransform(1, 0, 0, 1, 0, 0);
+      this.context.clearRect(0, 0, this.canvas.width, this.offsetY);
+      this.context.clearRect(0, this.canvas.height - this.offsetY, this.canvas.width, this.offsetY);
+
+      this.context.strokeStyle = '#777777';
+      this.context.beginPath();
+      this.context.moveTo(this.offsetX, this.offsetY);
+      this.context.lineTo(this.canvas.width - this.offsetX, this.offsetY);
+      this.context.moveTo(this.offsetX, this.canvas.height - this.offsetY);
+      this.context.lineTo(this.canvas.width - this.offsetX, this.canvas.height - this.offsetY);
+      this.context.stroke();
+      
+      this.context.restore();
+
+    }
+  }
+}

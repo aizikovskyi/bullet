@@ -18,27 +18,27 @@ class SomeBasicStageController {
     this.rampedPhase(gameState, 0, 10, 0.1, 0.3, () => {
       const xPos = Math.round(Math.random() * gameState.fieldDimensions.width);
 
-      const velocity = { x: Math.random() * 0.4 - 0.2, y: 3.5 + Math.random() };
+      const velocity = { x: Math.random() * 0.2 - 0.1, y: 1.2 + Math.random() };
       const newEnemy = new SimpleBullet(xPos, -10, velocity, gameState.frame, 'white');
-      newEnemy.radius = Math.round(3 + Math.random() * 10);
+      newEnemy.radius = Math.round(1 + Math.random() * 3);
       gameState.objects.push(newEnemy);
     });
     this.rampedPhase(gameState, 10, 40, 0.3, 0.1, () => {
       const xPos = Math.round(Math.random() * gameState.fieldDimensions.width);
 
-      const velocity = { x: Math.random() * 0.4 - 0.2, y: 3.5 + Math.random() };
+      const velocity = { x: Math.random() * 0.2 - 0.1, y: 1.2 + Math.random() };
       const newEnemy = new SimpleBullet(xPos, -10, velocity, gameState.frame, 'white');
-      newEnemy.radius = Math.round(3 + Math.random() * 10);
+      newEnemy.radius = Math.round(1 + Math.random() * 3);
       gameState.objects.push(newEnemy);
     });
     this.rampedPhase(gameState, 20, 40, 0.0, 0.1, () => {
       const xPos = Math.round(Math.random() * gameState.fieldDimensions.width);
       const velocity = { x: 0, y: 0 };
       const newEnemy = new SimpleBullet(xPos, -10, velocity, gameState.frame, 'yellow');
-      newEnemy.radius = 3;
+      newEnemy.radius = 2;
       const newVelocity = newEnemy.unitVectorTowards(gameState.playerObject);
-      newEnemy.velocity.x = newVelocity.x * 6;
-      newEnemy.velocity.y = newVelocity.y * 6;
+      newEnemy.velocity.x = newVelocity.x * 2;
+      newEnemy.velocity.y = newVelocity.y * 2;
       gameState.objects.push(newEnemy);
     });
   }
@@ -67,15 +67,15 @@ class GameController {
 
   static emptyGameState() {
     const gameState = {
-      playerObject: new PlayerObject(150, 300, { x: 0, y: 0 }, 0),
-      fieldDimensions: { width: 300, height: 400 },
+      playerObject: new PlayerObject(50, 120, { x: 0, y: 0 }, 0),
+      fieldDimensions: { width: 100, height: 180 },
       objects: [],
       frame: 0,
       fps: 30,
       lastFrame: -1,
       lastFrameDate: Date.now(),
       status: 'running',        // 'running', 'paused', 'finished'
-      playerStatus: 'alive',    // 'alive', 'dead', 'invulnerable'
+      playerStatus: 'invulnerable',    // 'alive', 'dead', 'invulnerable'
       playerInput: {
         movementTarget: null,
         movementActive: false,
@@ -102,7 +102,7 @@ class GameController {
   startStage(stage) {
     this.gameState = GameController.emptyGameState();
     this.stageController = GameController.stageControllerForStage(stage);
-    this.videoEngine.clearViewbox();
+    this.videoEngine.clearCanvas();
 
     this.mainLoopInterval = window.setInterval(() => this.mainLoop(), 1000 / this.gameState.fps);
     this.drawLoop();
@@ -192,17 +192,17 @@ class GameController {
       // either way, we can't draw from such stale data
       return;
     }
-    this.videoEngine.clearViewbox();
+    this.videoEngine.startFrame();
     this.gameState.objects.forEach((obj) => {
       const adjustedX = obj.x + (obj.velocity.x * frameDelta);
       const adjustedY = obj.y + (obj.velocity.y * frameDelta);
-      this.videoEngine.drawCircle(Math.round(adjustedX), Math.round(adjustedY), obj.radius, obj.color);
+      this.videoEngine.drawCircle(adjustedX, adjustedY, obj.radius, obj.color);
     });
     if (this.gameState.playerStatus !== 'dead') {
       const adjustedPlayerX = this.gameState.playerObject.x + (this.gameState.playerObject.velocity.x * frameDelta);
       const adjustedPlayerY = this.gameState.playerObject.y + (this.gameState.playerObject.velocity.y * frameDelta);
-      this.videoEngine.drawCircle(Math.round(adjustedPlayerX), Math.round(adjustedPlayerY), 3, 'red');
+      this.videoEngine.drawCircle(adjustedPlayerX, adjustedPlayerY, 3, 'green');
     }
-    this.videoEngine.update();
+    this.videoEngine.endFrame();
   }
 }

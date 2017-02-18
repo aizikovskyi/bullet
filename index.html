@@ -26,20 +26,19 @@
 
       function onLoad() {
 
-
-        VideoEngine.initWithCanvas(videoCanvas);
+        const videoEngine = new VideoEngine(videoCanvas);
 
         window.onresize = () => {
-          videoCanvas.width = window.innerWidth - 10;
-          videoCanvas.height = window.innerHeight - 10;
-          VideoEngine.updateSize();
+          videoCanvas.width = window.innerWidth;
+          videoCanvas.height = window.innerHeight;
+          videoEngine.updateSize();
         };
 
         window.onresize();
 
-        let canvasInputEngine = new CanvasInputEngine(videoCanvas, VideoEngine);
+        let canvasInputEngine = new CanvasInputEngine(videoCanvas, videoEngine);
         let menuEngine = new MenuEngine(document.documentElement);
-        let gameController = new GameController(VideoEngine, canvasInputEngine, menuEngine);
+        let gameController = new GameController(videoEngine, canvasInputEngine, menuEngine);
         gameController.startGame();
       }
     </script>

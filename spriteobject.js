@@ -39,7 +39,7 @@ class MovingObject {
 class SimpleBullet extends MovingObject {
   constructor(x, y, initialVelocity, birthFrame, color) {
     super(x, y, initialVelocity, birthFrame);
-    this.radius = 10;
+    this.radius = 3;
     this.deadly = true;
     this.color = color;
   }
@@ -49,7 +49,7 @@ class PlayerObject extends MovingObject {
   constructor(x, y, initialVelocity, birthFrame) {
     super(x, y, initialVelocity, birthFrame);
     this.radius = 1;
-    this.speed = 5;
+    this.speed = 1.3;
   }
 
   moveTowards(targetPoint) {
