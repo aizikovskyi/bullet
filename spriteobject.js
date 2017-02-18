@@ -29,7 +29,7 @@ class MovingObject {
   unitVectorTowards(point) {
     const dx = point.x - this.x;
     const dy = point.y - this.y;
-    //if (dx <= this.radius && dy <= this.radius) return { x: 0, y: 0 };
+    // if (dx <= this.radius && dy <= this.radius) return { x: 0, y: 0 };
     const length = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
     if (length === 0) return { x: 0, y: 0 };
     return { x: dx / length, y: dy / length };
@@ -53,7 +53,7 @@ class ExplosionParticle extends SimpleBullet {
       const len = Math.random();
       const velDeltaX = len * Math.cos(randomDir);
       const velDeltaY = len * Math.sin(randomDir);
-      const vel = { x: (origObject.velocity.x / 3) + velDeltaX, y: (origObject.velocity.y / 3 )+ velDeltaY };
+      const vel = { x: (origObject.velocity.x / 3) + velDeltaX, y: (origObject.velocity.y / 3) + velDeltaY };
       const newParticle = new ExplosionParticle(origObject.x, origObject.y, vel, gameState.frame, 'red');
       gameState.objects.push(newParticle);
     }
@@ -84,7 +84,8 @@ class PlayerObject extends MovingObject {
       const vector = this.unitVectorTowards(targetPoint);
       this.velocity.x = vector.x * this.speed;
       this.velocity.y = vector.y * this.speed;
-    } else {
+    }
+    else {
       this.velocity.x = 0;
       this.velocity.y = 0;
     }

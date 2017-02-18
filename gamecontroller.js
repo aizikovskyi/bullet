@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 class GameController {
   constructor(videoEngine, canvasInputEngine, menuEngine) {
     this.videoEngine = videoEngine;
@@ -70,7 +72,8 @@ class GameController {
       window.clearInterval(this.mainLoopInterval);
       if (this.gameState.playerStatus === 'dead') {
         this.startGame();
-      } else {
+      }
+      else {
         this.startStage(1);
       }
     }
@@ -106,7 +109,8 @@ class GameController {
     // Move the player object according to input
     if (this.gameState.playerInput.movementActive) {
       this.gameState.playerObject.moveTowards(this.gameState.playerInput.movementTarget);
-    } else {
+    }
+    else {
       this.gameState.playerObject.moveTowards(null);
     }
 

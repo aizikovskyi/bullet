@@ -7,7 +7,7 @@ class VideoEngine {
     this.minPlayfieldHeight = 130;
 
     // dummy values:
-    this.offsetX = 0;  // offset values are in canvas pixels!
+    this.offsetX = 0;  // offset values are in physical pixels, not playfield units
     this.offsetY = 0;
     this.scaleFactor = 1;
     this.playfieldHeight = 100;
@@ -32,14 +32,15 @@ class VideoEngine {
       this.playfieldHeight = this.maxPlayfieldHeight;
       this.offsetY = (height - (this.maxPlayfieldHeight * widthScaleFactor)) / 2;
       this.scaleFactor = widthScaleFactor;
-    } else
-    if (naivePlayfieldHeight < this.minPlayfieldHeight) {
+    }
+    else if (naivePlayfieldHeight < this.minPlayfieldHeight) {
       this.leftRightMargins = true;
       const heightScaleFactor = height / this.minPlayfieldHeight;
       this.playfieldHeight = this.minPlayfieldHeight;
       this.offsetX = (width - (this.playfieldWidth * heightScaleFactor)) / 2;
       this.scaleFactor = heightScaleFactor;
-    } else {
+    }
+    else {
       this.playfieldHeight = height / widthScaleFactor;
       this.scaleFactor = widthScaleFactor;
     }
@@ -120,7 +121,6 @@ class VideoEngine {
       this.context.stroke();
 
       this.context.restore();
-
     }
   }
 }

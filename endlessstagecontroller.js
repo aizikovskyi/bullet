@@ -2,7 +2,8 @@ class EndlessStageController {
   constructor(startingTime) {
     if (startingTime) {
       this.startingTime = startingTime;
-    } else {
+    }
+    else {
       this.startingTime = 0;
     }
   }
