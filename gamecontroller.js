@@ -29,7 +29,7 @@ class GameController {
       lastFrame: -1,
       lastFrameDate: Date.now(),
       status: 'running',        // 'running', 'paused', 'finished'
-      playerStatus: 'invulnerable',    // 'alive', 'dead', 'invulnerable'
+      playerStatus: 'alive',    // 'alive', 'dead', 'invulnerable'
       playerInput: {
         movementTarget: null,
         movementActive: false,
@@ -119,6 +119,7 @@ class GameController {
           obj.intersectsPoint(this.gameState.playerObject)) {
         this.gameState.playerStatus = 'dead';
         this.gameState.lastFrame = this.gameState.frame + 30;
+        ExplosionParticle.createExplosion(this.gameState.playerObject, this.gameState);
       }
     });
 

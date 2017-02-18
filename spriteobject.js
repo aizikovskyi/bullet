@@ -45,6 +45,31 @@ class SimpleBullet extends MovingObject {
   }
 }
 
+class ExplosionParticle extends SimpleBullet {
+  static createExplosion(origObject, gameState) {
+    for (let i = 0; i < 15; i++) {
+      // create a random length vector in a random direction
+      const randomDir = Math.random() * 2 * Math.PI;
+      const len = Math.random();
+      const velDeltaX = len * Math.cos(randomDir);
+      const velDeltaY = len * Math.sin(randomDir);
+      const vel = { x: origObject.velocity.x + velDeltaX, y: origObject.velocity.y + velDeltaY };
+      const newParticle = new ExplosionParticle(origObject.x, origObject.y, vel, gameState.frame, 'red');
+      gameState.objects.push(newParticle);
+    }
+  }
+  constructor(x, y, initialVelocity, birthFrame, color) {
+    super(x, y, initialVelocity, birthFrame, color);
+    this.radius = 0.5;
+  }
+  shouldRemain(gameState) {
+    if (gameState.frame - this.birthFrame > gameState.fps) {
+      return false;
+    }
+    return super.shouldRemain(gameState);
+  }
+}
+
 class PlayerObject extends MovingObject {
   constructor(x, y, initialVelocity, birthFrame) {
     super(x, y, initialVelocity, birthFrame);
