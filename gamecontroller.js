@@ -46,6 +46,7 @@ class GameController {
   startGame() {
     const fullscreenItem = MenuEngine.menuItem('TOGGLE FULLSCREEN', false, () => {
       toggleFullScreen();
+      this.videoEngine.updateSize();
     });
     const startGameItem = MenuEngine.menuItem('START GAME', true, () => {
       this.startStage(1);

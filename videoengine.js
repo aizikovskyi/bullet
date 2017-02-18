@@ -1,8 +1,7 @@
 class VideoEngine {
   constructor(canvas) {
     this.canvas = canvas;
-    this.context = canvas.getContext('2d');
-    this.untransformedContext = canvas.getContext('2d');
+    this.context = canvas.getContext('2d', { alpha: false });
     this.playfieldWidth = 100;
     this.maxPlayfieldHeight = 180;
     this.minPlayfieldHeight = 130;
@@ -46,16 +45,18 @@ class VideoEngine {
     }
 
     this.context.setTransform(1, 0, 0, 1, 0, 0);
-    this.context.clearRect(0, 0, width, height);
     this.context.translate(this.offsetX, this.offsetY);
     this.context.scale(this.scaleFactor, this.scaleFactor);
+    this.clearCanvas();
   }
 
   clearCanvas() {
     this.context.save();
     this.context.setTransform(1, 0, 0, 1, 0, 0);
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.fillStyle = 'black';
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.context.restore();
+    this.endFrame();
   }
 
   canvasPointToGameCoords(x, y) {
@@ -80,15 +81,17 @@ class VideoEngine {
   }
 
   startFrame() {
-    this.context.clearRect(0, 0, this.playfieldWidth, this.playfieldHeight);
+    this.context.fillStyle = 'black';
+    this.context.fillRect(0, 0, this.playfieldWidth, this.playfieldHeight);
   }
 
   endFrame() {
     if (this.leftRightMargins) {
       this.context.save();
+      this.context.fillStyle = 'black';
       this.context.setTransform(1, 0, 0, 1, 0, 0);
-      this.context.clearRect(0, 0, this.offsetX, this.canvas.height);
-      this.context.clearRect(this.canvas.width - this.offsetX, 0, this.offsetX, this.canvas.height);
+      this.context.fillRect(0, 0, this.offsetX, this.canvas.height);
+      this.context.fillRect(this.canvas.width - this.offsetX, 0, this.offsetX, this.canvas.height);
 
       this.context.strokeStyle = '#777777';
       this.context.beginPath();
@@ -99,14 +102,14 @@ class VideoEngine {
       this.context.stroke();
 
       this.context.restore();
-
     }
 
     if (this.topBottomMargins) {
       this.context.save();
+      this.context.fillStyle = 'black';
       this.context.setTransform(1, 0, 0, 1, 0, 0);
-      this.context.clearRect(0, 0, this.canvas.width, this.offsetY);
-      this.context.clearRect(0, this.canvas.height - this.offsetY, this.canvas.width, this.offsetY);
+      this.context.fillRect(0, 0, this.canvas.width, this.offsetY);
+      this.context.fillRect(0, this.canvas.height - this.offsetY, this.canvas.width, this.offsetY);
 
       this.context.strokeStyle = '#777777';
       this.context.beginPath();
@@ -115,7 +118,7 @@ class VideoEngine {
       this.context.moveTo(this.offsetX, this.canvas.height - this.offsetY);
       this.context.lineTo(this.canvas.width - this.offsetX, this.canvas.height - this.offsetY);
       this.context.stroke();
-      
+
       this.context.restore();
 
     }

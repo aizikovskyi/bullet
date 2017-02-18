@@ -53,7 +53,7 @@ class ExplosionParticle extends SimpleBullet {
       const len = Math.random();
       const velDeltaX = len * Math.cos(randomDir);
       const velDeltaY = len * Math.sin(randomDir);
-      const vel = { x: origObject.velocity.x + velDeltaX, y: origObject.velocity.y + velDeltaY };
+      const vel = { x: (origObject.velocity.x / 3) + velDeltaX, y: (origObject.velocity.y / 3 )+ velDeltaY };
       const newParticle = new ExplosionParticle(origObject.x, origObject.y, vel, gameState.frame, 'red');
       gameState.objects.push(newParticle);
     }
