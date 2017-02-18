@@ -2,15 +2,15 @@
 
 Pause
 Sound
-Player explosion
-More stages and enemy types
-End stage celebration
-End game celebration
-Z-order for enemies
 
 # Bugfixes / necessary improvements
 
 Pretty, resizable menu
-Good handling of fullscreen mode, window edges, playing field edges, resizing, landscape, desktop
+
+# Other game modes
+
 Plumbing for easier StageController creation
-Better controls - maybe some acceleration on first touch?
+More stages and enemy types
+End stage celebration
+End game celebration
+Z-order for enemies of different types

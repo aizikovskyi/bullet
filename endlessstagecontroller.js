@@ -16,7 +16,7 @@ class EndlessStageController {
       console.log('create enemy');
       const xPos = Math.round(Math.random() * gameState.fieldDimensions.width);
 
-      const velocity = { x: (Math.random() * 0.2 - 0.1) * (1 + (gameTime / 180)), y: downSpeed + Math.random() };
+      const velocity = new Point((Math.random() * 0.2 - 0.1) * (1 + (gameTime / 180)), downSpeed + Math.random());
       const newEnemy = new SimpleBullet(xPos, -10, velocity, gameState.frame, 'white');
       newEnemy.radius = Math.round(1 + Math.random() * 3);
       gameState.objects.push(newEnemy);

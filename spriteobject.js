@@ -1,9 +1,42 @@
-class MovingObject {
-
-  constructor(x, y, initialVelocity) {
+class Point {
+  constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.velocity = { x: initialVelocity.x, y: initialVelocity.y };
+  }
+
+  vectorTowards(point) {
+    const dx = point.x - this.x;
+    const dy = point.y - this.y;
+    return new Point(dx, dy);
+  }
+
+  unitVectorTowards(point) {
+    const dx = point.x - this.x;
+    const dy = point.y - this.y;
+    const length = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    if (length === 0) return new Point(0, 0);
+    return new Point(dx / length, dy / length);
+  }
+
+  distanceFromOrigin() {
+    return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+  }
+
+  distanceToPoint(point) {
+    return Math.sqrt(Math.pow(point.x - this.x, 2) + Math.pow(point.y - this.y, 2));
+  }
+
+  scaleBy(scalar) {
+    this.x *= scalar;
+    this.y *= scalar;
+  }
+}
+
+class MovingObject extends Point {
+
+  constructor(x, y, initialVelocity) {
+    super(x, y);
+    this.velocity = new Point(initialVelocity.x, initialVelocity.y);
     this.boundaryType = 0;
     this.radius = 0;
     this.deadly = false;
@@ -25,15 +58,6 @@ class MovingObject {
     const fitsHeight = /* (this.y > -this.radius) && */ (this.y < gameState.fieldDimensions.height + this.radius);
     return fitsWidth && fitsHeight;
   }
-
-  unitVectorTowards(point) {
-    const dx = point.x - this.x;
-    const dy = point.y - this.y;
-    // if (dx <= this.radius && dy <= this.radius) return { x: 0, y: 0 };
-    const length = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-    if (length === 0) return { x: 0, y: 0 };
-    return { x: dx / length, y: dy / length };
-  }
 }
 
 class SimpleBullet extends MovingObject {
@@ -53,7 +77,7 @@ class ExplosionParticle extends SimpleBullet {
       const len = Math.random();
       const velDeltaX = len * Math.cos(randomDir);
       const velDeltaY = len * Math.sin(randomDir);
-      const vel = { x: (origObject.velocity.x / 3) + velDeltaX, y: (origObject.velocity.y / 3) + velDeltaY };
+      const vel = new Point((origObject.velocity.x / 3) + velDeltaX, (origObject.velocity.y / 3) + velDeltaY);
       const newParticle = new ExplosionParticle(origObject.x, origObject.y, vel, gameState.frame, 'red');
       gameState.objects.push(newParticle);
     }
@@ -71,23 +95,45 @@ class ExplosionParticle extends SimpleBullet {
 }
 
 class PlayerObject extends MovingObject {
-  constructor(x, y, initialVelocity, birthFrame) {
+  constructor(x, y, birthFrame) {
+    const initialVelocity = new Point(0, 0);
     super(x, y, initialVelocity, birthFrame);
     this.radius = 1;
-    this.speed = 1.3;
+    this.maxSpeed = 3;
+    this.accel = 0.5;
+    this.maxAccel = 0.5;
   }
 
   moveTowards(targetPoint) {
     this.x += this.velocity.x;
     this.y += this.velocity.y;
     if (targetPoint) {
-      const vector = this.unitVectorTowards(targetPoint);
-      this.velocity.x = vector.x * this.speed;
-      this.velocity.y = vector.y * this.speed;
+      // If we are close enough to target point, just move directly onto it.
+      // This ensures we don't oscillate around it, which looks stupid
+      if (this.distanceToPoint(targetPoint) < this.maxSpeed) {
+        this.velocity = this.vectorTowards(targetPoint);
+      }
+      else {
+        // const vector = this.unitVectorTowards(targetPoint);
+        const curSpeed = this.velocity.distanceFromOrigin();
+        const accel = 0.2 + (curSpeed / 6);
+
+        const newLoc = new Point(this.x + this.velocity.x, this.y + this.velocity.y);
+        const vector = newLoc.unitVectorTowards(targetPoint);
+        const newVel = new Point(this.velocity.x + vector.x * accel, this.velocity.y + vector.y * accel);
+        const newSpeed = newVel.distanceFromOrigin();
+        if (newSpeed > this.maxSpeed) {
+          // Simple solution: newVel.scaleBy(this.maxSpeed / newSpeed);
+          // Instead:
+          newVel.scaleBy(this.maxSpeed / newSpeed);
+        }
+        this.velocity = newVel;
+      }
     }
     else {
-      this.velocity.x = 0;
-      this.velocity.y = 0;
+      this.velocity.scaleBy(Math.max(0, (this.velocity.distanceFromOrigin() - this.maxAccel) / this.velocity.distanceFromOrigin()));
+      // this.velocity.x = 0;
+      // this.velocity.y = 0;
     }
   }
 }

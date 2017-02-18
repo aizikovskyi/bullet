@@ -23,7 +23,7 @@ class GameController {
 
   static emptyGameState() {
     const gameState = {
-      playerObject: new PlayerObject(50, 120, { x: 0, y: 0 }, 0),
+      playerObject: new PlayerObject(50, 120, 0),
       fieldDimensions: { width: 100, height: 180 },
       objects: [],
       frame: 0,
@@ -42,7 +42,7 @@ class GameController {
   }
 
   static stageControllerForStage(stage) {
-    return new EndlessStageController();
+    return new EndlessStageController(0);
   }
 
   startGame() {
