@@ -12,7 +12,7 @@ class CanvasInputEngine {
       evt.preventDefault();
       this.moving = true;
       if (this.callbacks.moveTowards) {
-        this.callbacks.moveTowards(videoEngine.canvasPointToGameCoords(evt.clientX, evt.clientY));
+        this.callbacks.moveTowards(videoEngine.windowPointToGameCoords(evt.clientX, evt.clientY));
       }
     });
 
@@ -35,7 +35,7 @@ class CanvasInputEngine {
     canvas.addEventListener('mousemove', (evt) => {
       evt.preventDefault();
       if (this.moving && this.callbacks.moveTowards) {
-        this.callbacks.moveTowards(videoEngine.canvasPointToGameCoords(evt.clientX, evt.clientY));
+        this.callbacks.moveTowards(videoEngine.windowPointToGameCoords(evt.clientX, evt.clientY));
       }
     });
 
@@ -46,7 +46,7 @@ class CanvasInputEngine {
 
       this.activeTouchStack.push({ id: touch.identifier, x: touch.clientX, y: touch.clientY });
       if (this.callbacks.moveTowards) {
-        this.callbacks.moveTowards(videoEngine.canvasPointToGameCoords(touch.clientX, touch.clientY));
+        this.callbacks.moveTowards(videoEngine.windowPointToGameCoords(touch.clientX, touch.clientY));
       }
     });
 
@@ -60,7 +60,7 @@ class CanvasInputEngine {
             if (this.activeTouchStack.length > 0) {
               if (this.callbacks.moveTowards) {
                 const newLastTouch = this.activeTouchStack[this.activeTouchStack.length - 1];
-                this.callbacks.moveTowards(videoEngine.canvasPointToGameCoords(newLastTouch.x, newLastTouch.y));
+                this.callbacks.moveTowards(videoEngine.windowPointToGameCoords(newLastTouch.x, newLastTouch.y));
               }
             } else {
               this.moving = false;
@@ -95,7 +95,7 @@ class CanvasInputEngine {
       if (lastTouchChanged) {
         if (this.callbacks.moveTowards) {
           const storedTouch = this.activeTouchStack[this.activeTouchStack.length - 1];
-          this.callbacks.moveTowards(videoEngine.canvasPointToGameCoords(storedTouch.x, storedTouch.y));
+          this.callbacks.moveTowards(videoEngine.windowPointToGameCoords(storedTouch.x, storedTouch.y));
         }
       }
     });

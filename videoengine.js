@@ -60,7 +60,7 @@ class VideoEngine {
     this.endFrame();
   }
 
-  canvasPointToGameCoords(x, y) {
+  windowPointToGameCoords(x, y) {
     const rect = this.canvas.getBoundingClientRect();
     const viewboxX = x - rect.left - this.offsetX;
     const viewboxY = y - rect.top - this.offsetY;
@@ -74,6 +74,14 @@ class VideoEngine {
 
     return { x: scaledViewboxX, y: scaledViewboxY };
   }
+
+  gamePointToWindowCoords(x, y) {
+    const rect = this.canvas.getBoundingClientRect();
+    x = x * this.scaleFactor + this.offsetX + rect.left;
+    y = y * this.scaleFactor + this.offsetY + rect.top;
+    return { x, y };
+  }
+
   drawCircle(x, y, radius, color) {
     this.context.fillStyle = color;
     this.context.beginPath();

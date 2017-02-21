@@ -37,9 +37,9 @@
 
         window.onresize();
 
-        let canvasInputEngine = new CanvasInputEngine(videoCanvas, videoEngine);
-        let menuEngine = new MenuEngine(document.documentElement);
-        let gameController = new GameController(videoEngine, canvasInputEngine, menuEngine);
+        const canvasInputEngine = new CanvasInputEngine(videoCanvas, videoEngine);
+        const menuEngine = new MenuEngine(videoEngine, document.documentElement);
+        const gameController = new GameController(videoEngine, canvasInputEngine, menuEngine);
         gameController.startGame();
       }
     </script>

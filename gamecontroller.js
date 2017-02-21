@@ -42,7 +42,7 @@ class GameController {
   }
 
   static stageControllerForStage(stage) {
-    return new EndlessStageController(0);
+    return new EndlessStageController(30);
   }
 
   startGame() {
