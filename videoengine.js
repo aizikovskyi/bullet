@@ -2,6 +2,7 @@ class VideoEngine {
   constructor(canvas) {
     this.canvas = canvas;
     this.context = canvas.getContext('2d', { alpha: false });
+    this.resizeObservers = [];
     this.playfieldWidth = 100;
     this.maxPlayfieldHeight = 180;
     this.minPlayfieldHeight = 130;
@@ -49,6 +50,8 @@ class VideoEngine {
     this.context.translate(this.offsetX, this.offsetY);
     this.context.scale(this.scaleFactor, this.scaleFactor);
     this.clearCanvas();
+
+    this.resizeObservers.forEach(callback => callback());
   }
 
   clearCanvas() {
@@ -80,6 +83,14 @@ class VideoEngine {
     x = x * this.scaleFactor + this.offsetX + rect.left;
     y = y * this.scaleFactor + this.offsetY + rect.top;
     return { x, y };
+  }
+
+  addResizeObserver(callback) {
+    this.resizeObservers.push(callback);
+  }
+
+  removeResizeObserver(callback) {
+    this.resizeObservers = this.resizeObservers.filter(obj => obj !== callback);
   }
 
   drawCircle(x, y, radius, color) {
