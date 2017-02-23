@@ -9,13 +9,13 @@ class GameController {
     this.stageController = null;
     this.mainLoopInterval = null;
     this.canvasInputEngine.callbacks.moveTowards = (point) => {
-      if (this.gameState) {
+      if (this.playerRespondsToInput()) {
         this.gameState.playerInput.movementActive = true;
         this.gameState.playerInput.movementTarget = point;
       }
     };
     this.canvasInputEngine.callbacks.stopMoving = () => {
-      if (this.gameState) {
+      if (this.playerRespondsToInput()) {
         this.gameState.playerInput.movementActive = false;
       }
     };
@@ -31,7 +31,7 @@ class GameController {
       lastFrame: -1,
       lastFrameDate: Date.now(),
       status: 'running',        // 'running', 'paused', 'finished'
-      playerStatus: 'alive',    // 'alive', 'dead', 'invulnerable'
+      playerStatus: 'alive',    // 'alive', 'dead', 'invulnerable', 'disabled'
       playerInput: {
         movementTarget: null,
         movementActive: false,
@@ -39,10 +39,6 @@ class GameController {
       eventListeners: {},
     };
     return gameState;
-  }
-
-  static stageControllerForStage(stage) {
-    return new EndlessStageController(30);
   }
 
   startGame() {
@@ -54,22 +50,51 @@ class GameController {
       this.startStage(1);
     });
     this.menuEngine.showMenu([fullscreenItem, startGameItem]);
+    this.startAttractMode();
   }
 
-  startStage(stage) {
+  startStage() {
+    this.fullStop();
     this.gameState = GameController.emptyGameState();
-    this.stageController = GameController.stageControllerForStage(stage);
+    this.stageController = new EndlessStageController(30);
     this.videoEngine.clearCanvas();
 
     this.mainLoopInterval = window.setInterval(() => this.mainLoop(), 1000 / this.gameState.fps);
     this.drawLoop();
-    this.menuEngine.showMessage(`STAGE ${stage} BEGIN`, 3);
+  }
+
+  playerRespondsToInput() {
+    if (this.gameState) {
+      return this.gameState.playerStatus === 'alive' || this.gameState.playerStatus === 'invulnerable';
+    }
+    return false;
+  }
+
+  startAttractMode() {
+    this.fullStop();
+    this.gameState = GameController.emptyGameState();
+    this.gameState.playerStatus = 'disabled';
+    this.stageController = new EndlessStageController(300);
+    this.videoEngine.clearCanvas();
+
+    this.mainLoopInterval = window.setInterval(() => this.mainLoop(), 1000 / this.gameState.fps);
+    this.drawLoop();
+  }
+
+  fullStop() {
+    if (this.gameState) {
+      this.gameState.status = 'finished';
+    }
+    if (this.mainLoopInterval !== null) {
+      window.clearInterval(this.mainLoopInterval);
+    }
   }
 
   mainLoop() {
     // for now, tick and draw are called together. In principle they can be called separately.
-    if (this.gameState.status === 'finished') {
+    if (this.gameState.status === 'finished' && this.mainLoopInterval !== null) {
       window.clearInterval(this.mainLoopInterval);
+      this.mainLoopInterval = null;
       if (this.gameState.playerStatus === 'dead') {
         this.startGame();
       }
@@ -158,7 +183,7 @@ class GameController {
       const adjustedY = obj.y + (obj.velocity.y * frameDelta);
       this.videoEngine.drawCircle(adjustedX, adjustedY, obj.radius, obj.color);
     });
-    if (this.gameState.playerStatus !== 'dead') {
+    if (this.gameState.playerStatus !== 'dead' && this.gameState.playerStatus !== 'disabled') {
       const adjustedPlayerX = this.gameState.playerObject.x + (this.gameState.playerObject.velocity.x * frameDelta);
       const adjustedPlayerY = this.gameState.playerObject.y + (this.gameState.playerObject.velocity.y * frameDelta);
       this.videoEngine.drawCircle(adjustedPlayerX, adjustedPlayerY, this.gameState.playerObject.radius, 'red');
