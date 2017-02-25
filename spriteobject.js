@@ -71,10 +71,11 @@ class SimpleBullet extends MovingObject {
 
 class ExplosionParticle extends SimpleBullet {
   static createExplosion(origObject, gameState) {
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 35; i++) {
       // create a random length vector in a random direction
+      const maxVel = 0.5;
       const randomDir = Math.random() * 2 * Math.PI;
-      const len = Math.random();
+      const len = Math.random() * maxVel;
       const velDeltaX = len * Math.cos(randomDir);
       const velDeltaY = len * Math.sin(randomDir);
       const vel = new Point((origObject.velocity.x / 3) + velDeltaX, (origObject.velocity.y / 3) + velDeltaY);
@@ -84,7 +85,7 @@ class ExplosionParticle extends SimpleBullet {
   }
   constructor(x, y, initialVelocity, birthFrame, color) {
     super(x, y, initialVelocity, birthFrame, color);
-    this.radius = 0.5;
+    this.radius = 0.4;
   }
   shouldRemain(gameState) {
     if (gameState.frame - this.birthFrame > gameState.fps) {

@@ -138,7 +138,7 @@ class GameController {
       if (obj.deadly && this.gameState.playerStatus === 'alive' &&
           obj.intersectsPoint(this.gameState.playerObject)) {
         this.gameState.playerStatus = 'dead';
-        this.gameState.lastFrame = this.gameState.frame + 60;
+        this.gameState.lastFrame = this.gameState.frame + 30;
         this.gameState.lastLivingFrame = this.gameState.frame;
         ExplosionParticle.createExplosion(this.gameState.playerObject, this.gameState);
       }
