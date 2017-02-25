@@ -8,7 +8,6 @@ class GameController {
     this.gameState = null;
     this.stageController = null;
     this.mainLoopInterval = null;
-    this.lastScore = null;
     this.canvasInputEngine.callbacks.moveTowards = (point) => {
       if (this.playerRespondsToInput()) {
         this.gameState.playerInput.movementActive = true;
@@ -20,6 +19,7 @@ class GameController {
         this.gameState.playerInput.movementActive = false;
       }
     };
+    this.videoEngine.addResizeObserver(() => this.draw());
   }
 
   static emptyGameState() {
@@ -52,7 +52,6 @@ class GameController {
       this.startStage(1);
     });
     this.menuEngine.showMenu([fullscreenItem, startGameItem]);
-    this.startAttractMode();
   }
 
   startStage() {
@@ -72,28 +71,17 @@ class GameController {
     return false;
   }
 
-  startAttractMode() {
-    this.fullStop();
-    this.gameState = GameController.emptyGameState();
-    this.gameState.playerStatus = 'disabled';
-    this.stageController = new EndlessStageController(30);
-    this.videoEngine.clearCanvas();
-
-    this.mainLoopInterval = window.setInterval(() => this.mainLoop(), 1000 / this.gameState.fps);
-    this.drawLoop();
-  }
-
   fullStop() {
     if (this.gameState) {
       this.gameState.status = 'finished';
     }
     if (this.mainLoopInterval !== null) {
       window.clearInterval(this.mainLoopInterval);
+      this.mainLoopInterval = null;
     }
   }
 
   mainLoop() {
-    // for now, tick and draw are called together. In principle they can be called separately.
     if (this.gameState.status === 'finished' && this.mainLoopInterval !== null) {
       window.clearInterval(this.mainLoopInterval);
       this.mainLoopInterval = null;
@@ -173,8 +161,10 @@ class GameController {
   }
 
   draw() {
+    if (!this.gameState) return;
+
     const timeDelta = Date.now() - this.gameState.lastFrameDate;
-    const frameDelta = timeDelta * this.gameState.fps / 1000;
+    const frameDelta = (this.gameState.status === 'finished') ? 0 : timeDelta * this.gameState.fps / 1000;
     if (frameDelta > 2) {
       // the game was paused? user switched to a different app?
       // either way, we can't draw from such stale data
@@ -191,20 +181,15 @@ class GameController {
       const adjustedPlayerY = this.gameState.playerObject.y + (this.gameState.playerObject.velocity.y * frameDelta);
       this.videoEngine.drawCircle(adjustedPlayerX, adjustedPlayerY, this.gameState.playerObject.radius, 'red');
     }
+
     if (this.gameState.playerStatus !== 'disabled') {
       const scoringFrame = (this.gameState.playerStatus === 'dead') ?
         this.gameState.lastLivingFrame :
         this.gameState.frame;
       const gameTime = scoringFrame / this.gameState.fps;
-      this.lastScore = gameTime;
       this.videoEngine.showScore(`TIME: ${gameTime.toFixed(2)}`);
     }
-    else {
-      // if we are in attract mode, keep showing the previous high showScore
-      if (this.lastScore) {
-        this.videoEngine.showScore(`TIME: ${this.lastScore.toFixed(2)}`);
-      }
-    }
+
     this.videoEngine.endFrame();
   }
 }
