@@ -43,6 +43,7 @@ class MenuEngine {
       popupDiv.style.height = `${rect.height}px`;
       popupDiv.style.left = `${rect.left}px`;
       popupDiv.style.top = `${rect.top}px`;
+      popupDiv.children[0].style['font-size'] = this.videoEngine.fontSizeForLabelHeight(rect.height);
     };
     resizeCallback();
     this.videoEngine.addResizeObserver(resizeCallback);
@@ -64,6 +65,7 @@ class MenuEngine {
       popupDiv.style.height = `${rect.height}px`;
       popupDiv.style.left = `${rect.left}px`;
       popupDiv.style.top = `${rect.top}px`;
+      popupDiv.children[0].style['font-size'] = this.videoEngine.fontSizeForLabelHeight(rect.height);
     };
     resizeCallback();
     this.videoEngine.addResizeObserver(resizeCallback);
@@ -92,6 +94,7 @@ class MenuEngine {
         popupDiv.style.height = `${rect.height}px`;
         popupDiv.style.left = `${rect.left}px`;
         popupDiv.style.top = `${rect.top}px`;
+        popupDiv.children[0].style['font-size'] = this.videoEngine.fontSizeForLabelHeight(rect.height);
       };
       resizeCallbacks.push(resizeCallback);
       resizeCallback();

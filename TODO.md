@@ -5,7 +5,9 @@ Sound
 
 # Bugfixes / necessary improvements
 
-Pretty, resizable menu
+Improve (or remove) inertia
+Better attract mode
+Make menu items properly styled buttons
 
 # Other game modes
 

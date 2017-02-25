@@ -13,7 +13,6 @@ class EndlessStageController {
     const downSpeed = 1 + (gameTime / 300);
 
     if (Math.random() > Math.pow(0.7, gameTime / 60)) {
-      console.log('create enemy');
       const xPos = Math.round(Math.random() * gameState.fieldDimensions.width);
 
       const velocity = new Point((Math.random() * 0.2 - 0.1) * (1 + (gameTime / 180)), downSpeed + Math.random());

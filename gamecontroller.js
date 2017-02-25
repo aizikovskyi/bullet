@@ -8,6 +8,7 @@ class GameController {
     this.gameState = null;
     this.stageController = null;
     this.mainLoopInterval = null;
+    this.lastScore = null;
     this.canvasInputEngine.callbacks.moveTowards = (point) => {
       if (this.playerRespondsToInput()) {
         this.gameState.playerInput.movementActive = true;
@@ -29,6 +30,7 @@ class GameController {
       frame: 0,
       fps: 30,
       lastFrame: -1,
+      lastLivingFrame: -1,
       lastFrameDate: Date.now(),
       status: 'running',        // 'running', 'paused', 'finished'
       playerStatus: 'alive',    // 'alive', 'dead', 'invulnerable', 'disabled'
@@ -74,7 +76,7 @@ class GameController {
     this.fullStop();
     this.gameState = GameController.emptyGameState();
     this.gameState.playerStatus = 'disabled';
-    this.stageController = new EndlessStageController(300);
+    this.stageController = new EndlessStageController(30);
     this.videoEngine.clearCanvas();
 
     this.mainLoopInterval = window.setInterval(() => this.mainLoop(), 1000 / this.gameState.fps);
@@ -148,7 +150,8 @@ class GameController {
       if (obj.deadly && this.gameState.playerStatus === 'alive' &&
           obj.intersectsPoint(this.gameState.playerObject)) {
         this.gameState.playerStatus = 'dead';
-        this.gameState.lastFrame = this.gameState.frame + 30;
+        this.gameState.lastFrame = this.gameState.frame + 60;
+        this.gameState.lastLivingFrame = this.gameState.frame;
         ExplosionParticle.createExplosion(this.gameState.playerObject, this.gameState);
       }
     });
@@ -187,6 +190,20 @@ class GameController {
       const adjustedPlayerX = this.gameState.playerObject.x + (this.gameState.playerObject.velocity.x * frameDelta);
       const adjustedPlayerY = this.gameState.playerObject.y + (this.gameState.playerObject.velocity.y * frameDelta);
       this.videoEngine.drawCircle(adjustedPlayerX, adjustedPlayerY, this.gameState.playerObject.radius, 'red');
+    }
+    if (this.gameState.playerStatus !== 'disabled') {
+      const scoringFrame = (this.gameState.playerStatus === 'dead') ?
+        this.gameState.lastLivingFrame :
+        this.gameState.frame;
+      const gameTime = scoringFrame / this.gameState.fps;
+      this.lastScore = gameTime;
+      this.videoEngine.showScore(`TIME: ${gameTime.toFixed(2)}`);
+    }
+    else {
+      // if we are in attract mode, keep showing the previous high showScore
+      if (this.lastScore) {
+        this.videoEngine.showScore(`TIME: ${this.lastScore.toFixed(2)}`);
+      }
     }
     this.videoEngine.endFrame();
   }

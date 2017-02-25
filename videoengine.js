@@ -93,11 +93,22 @@ class VideoEngine {
     this.resizeObservers = this.resizeObservers.filter(obj => obj !== callback);
   }
 
+  fontSizeForLabelHeight(height) {
+    return `${height * 2}%`;
+  }
+
   drawCircle(x, y, radius, color) {
     this.context.fillStyle = color;
     this.context.beginPath();
     this.context.arc(x, y, radius, 0, Math.PI * 2, false);
     this.context.fill();
+  }
+
+  showScore(text) {
+    this.context.textAlign = 'left';
+    this.context.font = '5px Arial';
+    this.context.fillStyle = 'white';
+    this.context.fillText(text, 0, 5);
   }
 
   startFrame() {
