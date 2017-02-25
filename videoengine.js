@@ -106,9 +106,9 @@ class VideoEngine {
 
   showScore(text) {
     this.context.textAlign = 'left';
-    this.context.font = '5px Arial';
+    this.context.font = '3px Arial';
     this.context.fillStyle = 'white';
-    this.context.fillText(text, 0, 5);
+    this.context.fillText(text, 1, 4);
   }
 
   startFrame() {
@@ -153,4 +153,32 @@ class VideoEngine {
       this.context.restore();
     }
   }
+
+
+    // ************************************
+    // FRAME BUFFER RELATED STUFF
+    // ************************************
+
+    initFrameBuffers() {
+      this.frameBufferScaleFactor = 0.5;
+      const bufferWidth = this.frameBufferScaleFactor * this.playfieldWidth;
+      const bufferHeight = this.frameBufferScaleFactor * this.maxPlayfieldHeight;  // maybe replace with min if efficiency becomes an issue
+      this.pastFrameBuffers = [];
+      for (let i = 0; i < 5; i++) {
+        const buffer = document.createElement('canvas');
+        buffer.width = bufferWidth;
+        buffer.height = bufferHeight;
+        this.pastFrameBuffers.push(buffer);
+      }
+      // currFrameBuffer is a superposition of two buffers to create a 'motion blur'
+      this.currFrameBuffer = document.createElement('canvas');
+      this.currFrameBuffer.width = bufferWidth;
+      this.currFrameBuffer.height = bufferHeight;
+      this.resetFrameBufferCounters();
+    }
+
+    resetFrameBufferCounters() {
+      this.currBufferIndex = 0;
+      this.pastFrameBuffersFilled = false;
+    }
 }

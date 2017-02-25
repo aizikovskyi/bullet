@@ -12,7 +12,7 @@ class MenuEngine {
 
   menuItemRectWithItemOffset(itemOffset) {
     const menuItemWidth = 90; // game units
-    const menuItemHeight = 20; // game units
+    const menuItemHeight = 15; // game units
     const menuItemSpacing = 5; // game units
     const topOffset = 5; // game units
     const leftOffset = 5; // game units
