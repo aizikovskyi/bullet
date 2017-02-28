@@ -33,7 +33,7 @@ class GameController {
       lastLivingFrame: -1,
       lastFrameDate: Date.now(),
       status: 'running',        // 'running', 'paused', 'finished'
-      playerStatus: 'alive',    // 'alive', 'dead', 'invulnerable', 'disabled'
+      playerStatus: 'invulnerable',    // 'alive', 'dead', 'invulnerable', 'disabled'
       playerInput: {
         movementTarget: null,
         movementActive: false,
@@ -57,7 +57,7 @@ class GameController {
   startStage() {
     this.fullStop();
     this.gameState = GameController.emptyGameState();
-    this.stageController = new EndlessStageController(30);
+    this.stageController = new EndlessStageController(300);
     this.videoEngine.clearCanvas();
     this.videoEngine.useBuffers = true;
     this.videoEngine.resetFrameBufferCounters();

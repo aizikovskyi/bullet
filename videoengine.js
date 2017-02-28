@@ -178,11 +178,15 @@ class VideoEngine {
         this.frameBuffersFilled = true;
       }
       // Prepare the output buffer
-      this.compositeFrameBufferContext.fillStyle = 'black';
-      this.compositeFrameBufferContext.fillRect(0, 0, this.playfieldWidth, this.playfieldHeight);
+      this.compositeFrameBufferContext.setTransform(1, 0, 0, 1, 0, 0);
+      this.compositeFrameBufferContext.scale(this.frameBufferScaleFactor, this.frameBufferScaleFactor);
+      this.compositeFrameBufferContext.fillStyle = 'green';
+      this.compositeFrameBufferContext.fillRect(0, 0, this.playfieldWidth * 100, this.playfieldHeight * 100);
 
 
       // Place current frame in output buffer
+      this.compositeFrameBufferContext.setTransform(1, 0, 0, 1, 0, 0);
+      //this.compositeFrameBufferContext.scale(1 / this.frameBufferScaleFactor, 1 / this.frameBufferScaleFactor);
       this.compositeFrameBufferContext.drawImage(this.frameBuffers[this.currBufferIndex], 0, 0);
 
       // Place a semi-transparent version of past frame in output buffer, if it is available
@@ -198,7 +202,11 @@ class VideoEngine {
 
       // Debug only: display the buffer on the main canvas
       if (this.useCanvas) {
+        this.context.save();
+        this.context.setTransform(1, 0, 0, 1, 0, 0);
+        this.context.scale(1 / this.frameBufferScaleFactor, 1 / this.frameBufferScaleFactor);
         this.context.drawImage(this.compositeFrameBuffer, 0, 0);
+        this.context.restore();
       }
     } // if (this.useBuffers)
   }
@@ -210,7 +218,7 @@ class VideoEngine {
 
   initFrameBuffers() {
     this.numBuffers = 5;
-    this.frameBufferScaleFactor = 1.0;
+    this.frameBufferScaleFactor = 0.5;
     const bufferWidth = this.frameBufferScaleFactor * this.playfieldWidth;
     const bufferHeight = this.frameBufferScaleFactor * this.minPlayfieldHeight;  // ensure AI doesn't go off-screen in some orientations
     this.frameBuffers = [];
@@ -231,7 +239,6 @@ class VideoEngine {
     this.compositeFrameBuffer.width = bufferWidth;
     this.compositeFrameBuffer.height = bufferHeight;
     this.compositeFrameBufferContext = this.compositeFrameBuffer.getContext('2d');
-    this.compositeFrameBufferContext.scale(this.frameBufferScaleFactor, this.frameBufferScaleFactor);
     this.resetFrameBufferCounters();
   }
 
