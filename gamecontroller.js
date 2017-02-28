@@ -59,6 +59,8 @@ class GameController {
     this.gameState = GameController.emptyGameState();
     this.stageController = new EndlessStageController(30);
     this.videoEngine.clearCanvas();
+    this.videoEngine.useBuffers = true;
+    this.videoEngine.resetFrameBufferCounters();
 
     this.mainLoopInterval = window.setInterval(() => this.mainLoop(), 1000 / this.gameState.fps);
     this.drawLoop();
