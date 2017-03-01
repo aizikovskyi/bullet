@@ -212,7 +212,7 @@ class GameController {
       const gameTime = scoringFrame / this.gameState.fps;
       this.videoEngine.showScore(`TIME: ${gameTime.toFixed(2)}`);
       if (this.gameState.playerStatus === 'dead' || scoringFrame > this.existingHighScore) {
-        if (scoringFrame > this.existingHighScore) {
+        if (scoringFrame > this.existingHighScore && this.existingHighScore > 0) {
           this.videoEngine.showHighScore('NEW BEST TIME!');
         }
         else {
