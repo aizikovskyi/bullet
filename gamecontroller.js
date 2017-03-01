@@ -34,6 +34,7 @@ class GameController {
       lastFrameDate: Date.now(),
       status: 'running',        // 'running', 'paused', 'finished'
       playerStatus: 'alive',    // 'alive', 'dead', 'invulnerable', 'disabled'
+      playerType: 'human',      // 'human', 'agent', 'recall'
       playerInput: {
         movementTarget: null,
         movementActive: false,
@@ -68,7 +69,7 @@ class GameController {
   }
 
   playerRespondsToInput() {
-    if (this.gameState) {
+    if (this.gameState && this.gameState.playerType === 'human') {
       return this.gameState.playerStatus === 'alive' || this.gameState.playerStatus === 'invulnerable';
     }
     return false;
@@ -125,11 +126,23 @@ class GameController {
     if (this.gameState.status !== 'running') return;
 
     // Move the player object according to input
-    if (this.gameState.playerInput.movementActive) {
-      this.gameState.playerObject.moveTowards(this.gameState.playerInput.movementTarget);
+    if (this.gameState.playerType === 'human') {
+      if (this.gameState.playerInput.movementActive) {
+        this.gameState.playerObject.moveTowards(this.gameState.playerInput.movementTarget);
+      }
+      else {
+        this.gameState.playerObject.moveTowards(null);
+      }
     }
-    else {
-      this.gameState.playerObject.moveTowards(null);
+    else if (this.gameState.playerType === 'agent') {
+      const state = {
+        frame: this.gameState.frame,
+        // ...
+      };
+      this.gameState.playerObject.moveTowards(this.agent.targetPointForState(state));
+    }
+    else if (this.gameState.playerType === 'recall') {
+      // ...
     }
 
     // Then, for each enemy object:
