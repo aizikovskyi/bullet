@@ -121,6 +121,15 @@ class VideoEngine {
     }
   }
 
+  showHighScore(text) {
+    if (this.useCanvas) {
+      this.context.textAlign = 'right';
+      this.context.font = '3px Arial';
+      this.context.fillStyle = 'white';
+      this.context.fillText(text, 99, 4);
+    }
+  }
+
   startFrame() {
     if (this.useCanvas) {
       this.context.fillStyle = 'black';

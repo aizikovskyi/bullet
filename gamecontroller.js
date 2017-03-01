@@ -1,10 +1,12 @@
 /* eslint-env browser */
 
 class GameController {
-  constructor(videoEngine, canvasInputEngine, menuEngine) {
+  constructor(videoEngine, canvasInputEngine, menuEngine, highScoreLoader) {
     this.videoEngine = videoEngine;
     this.canvasInputEngine = canvasInputEngine;
     this.menuEngine = menuEngine;
+    this.highScoreLoader = highScoreLoader;
+    this.highScore = highScoreLoader.getHighScore();
     this.gameState = null;
     this.stageController = null;
     this.mainLoopInterval = null;
@@ -63,6 +65,7 @@ class GameController {
     this.videoEngine.clearCanvas();
     this.videoEngine.useBuffers = true;
     this.videoEngine.resetFrameBufferCounters();
+    this.existingHighScore = this.highScore;
 
     this.mainLoopInterval = window.setInterval(() => this.mainLoop(), 1000 / this.gameState.fps);
     this.drawLoop();
@@ -156,6 +159,10 @@ class GameController {
         this.gameState.playerStatus = 'dead';
         this.gameState.lastFrame = this.gameState.frame + 30;
         this.gameState.lastLivingFrame = this.gameState.frame;
+        if (this.gameState.frame > this.highScore) {
+          this.highScore = this.gameState.frame;
+          this.highScoreLoader.setHighScore(this.highScore);
+        }
         ExplosionParticle.createExplosion(this.gameState.playerObject, this.gameState);
       }
     });
@@ -204,6 +211,14 @@ class GameController {
         this.gameState.frame;
       const gameTime = scoringFrame / this.gameState.fps;
       this.videoEngine.showScore(`TIME: ${gameTime.toFixed(2)}`);
+      if (this.gameState.playerStatus === 'dead' || scoringFrame > this.existingHighScore) {
+        if (scoringFrame > this.existingHighScore) {
+          this.videoEngine.showHighScore('NEW BEST TIME!');
+        }
+        else {
+          this.videoEngine.showHighScore(`BEST: ${(this.highScore / this.gameState.fps).toFixed(2)}`);
+        }
+      }
     }
 
     this.videoEngine.endFrame();

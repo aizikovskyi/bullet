@@ -4,6 +4,7 @@
 
     </style>
     <script type="text/javascript" src="seedrandom.js"></script>
+    <script type="text/javascript" src="highscore.js"></script>
     <script type="text/javascript" src="videoengine.js"></script>
     <script type="text/javascript" src="canvasinputengine.js"></script>
     <script type="text/javascript" src="menuengine.js"></script>
@@ -41,7 +42,8 @@
 
         const canvasInputEngine = new CanvasInputEngine(videoCanvas, videoEngine);
         const menuEngine = new MenuEngine(videoEngine, document.documentElement);
-        const gameController = new GameController(videoEngine, canvasInputEngine, menuEngine);
+        const highScoreLoader = new HighScoreLoader("0.1");
+        const gameController = new GameController(videoEngine, canvasInputEngine, menuEngine, highScoreLoader);
         gameController.startGame();
       }
     </script>
