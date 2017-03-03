@@ -43,7 +43,8 @@
         const canvasInputEngine = new CanvasInputEngine(videoCanvas, videoEngine);
         const menuEngine = new MenuEngine(videoEngine, document.documentElement);
         const highScoreLoader = new HighScoreLoader("0.1");
-        const gameController = new GameController(videoEngine, canvasInputEngine, menuEngine, highScoreLoader);
+        const agent = new Agent();
+        const gameController = new GameController(videoEngine, canvasInputEngine, menuEngine, highScoreLoader, agent);
         gameController.startGame();
       }
     </script>

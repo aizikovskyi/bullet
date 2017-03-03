@@ -1,11 +1,12 @@
 /* eslint-env browser */
 
 class GameController {
-  constructor(videoEngine, canvasInputEngine, menuEngine, highScoreLoader) {
+  constructor(videoEngine, canvasInputEngine, menuEngine, highScoreLoader, agent) {
     this.videoEngine = videoEngine;
     this.canvasInputEngine = canvasInputEngine;
     this.menuEngine = menuEngine;
     this.highScoreLoader = highScoreLoader;
+    this.agent = agent;
     this.highScore = highScoreLoader.getHighScore();
     this.gameState = null;
     this.stageController = null;
@@ -52,19 +53,21 @@ class GameController {
       this.videoEngine.updateSize();
     });
     const startGameItem = MenuEngine.menuItem('START GAME', true, () => {
-      this.startStage(1);
+      this.startStage('human');
     });
     this.menuEngine.showMenu([fullscreenItem, startGameItem]);
   }
 
-  startStage() {
+  startStage(playerType) {
     this.fullStop();
     this.randomSeed = Math.seedrandom();
     this.gameState = GameController.emptyGameState();
+    this.gameState.playerType = playerType;
     this.stageController = new EndlessStageController(60);
     this.videoEngine.clearCanvas();
-    this.videoEngine.useBuffers = true;
-    this.videoEngine.resetFrameBufferCounters();
+    if (playerType === 'agent') {
+      this.videoEngine.resetFrameBufferCounters();
+    }
     this.existingHighScore = this.highScore;
 
     this.mainLoopInterval = window.setInterval(() => this.mainLoop(), 1000 / this.gameState.fps);
@@ -138,11 +141,14 @@ class GameController {
       }
     }
     else if (this.gameState.playerType === 'agent') {
+      this.drawFrameBuffer();
       const state = {
         frame: this.gameState.frame,
+        frameBuffer: this.videoEngine.compositeFrameBuffer,
+        playerObject: this.gameState.playerObject,
         // ...
       };
-      this.gameState.playerObject.moveTowards(this.agent.targetPointForState(state));
+      this.gameState.playerObject.moveTowards(this.agent.movementTargetForState(state));
     }
     else if (this.gameState.playerType === 'recall') {
       // ...
@@ -184,8 +190,8 @@ class GameController {
   }
 
   draw() {
+    // This is meant to be called async and draw to main screen.
     if (!this.gameState) return;
-
     const timeDelta = Date.now() - this.gameState.lastFrameDate;
     const frameDelta = (this.gameState.status === 'finished') ? 0 : timeDelta * this.gameState.fps / 1000;
     if (frameDelta > 2) {
@@ -193,6 +199,21 @@ class GameController {
       // either way, we can't draw from such stale data
       return;
     }
+    this.videoEngine.useCanvas = true;
+    this.videoEngine.useBuffers = false;
+    this.drawWithFrameDelta(frameDelta);
+  }
+
+  drawFrameBuffer() {
+    // This is meant to be called synchronously before tick() and updates the frame buffer for the agent
+    this.videoEngine.useCanvas = false;
+    this.videoEngine.useBuffers = true;
+    this.drawWithFrameDelta(0);
+  }
+
+  drawWithFrameDelta(frameDelta) {
+    if (!this.gameState) return;
+
     this.videoEngine.startFrame();
     this.gameState.objects.forEach((obj) => {
       const adjustedX = obj.x + (obj.velocity.x * frameDelta);
@@ -211,12 +232,14 @@ class GameController {
         this.gameState.frame;
       const gameTime = scoringFrame / this.gameState.fps;
       this.videoEngine.showScore(`TIME: ${gameTime.toFixed(2)}`);
-      if (this.gameState.playerStatus === 'dead' || scoringFrame > this.existingHighScore) {
-        if (scoringFrame > this.existingHighScore && this.existingHighScore > 0) {
-          this.videoEngine.showHighScore('NEW BEST TIME!');
-        }
-        else {
-          this.videoEngine.showHighScore(`BEST: ${(this.highScore / this.gameState.fps).toFixed(2)}`);
+      if (this.gameState.playerType === 'human') {
+        if (this.gameState.playerStatus === 'dead' || (scoringFrame > this.existingHighScore && this.existingHighScore > 0)) {
+          if (scoringFrame > this.existingHighScore) {
+            this.videoEngine.showHighScore('NEW BEST TIME!');
+          }
+          else {
+            this.videoEngine.showHighScore(`BEST: ${(this.highScore / this.gameState.fps).toFixed(2)}`);
+          }
         }
       }
     }

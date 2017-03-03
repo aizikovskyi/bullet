@@ -11,11 +11,11 @@
 // (since on-screen draw() must use deltas to look smooth)
 
 /*
-Game loop timeline:
+Game loop timeline with player movement, async version:
 
 Frame is N
-tick(): player position is updated
-tick(): object positions are updated
+tick(): player position is updated, using a velocity that arrived asynchronously.
+tick(): object positions are updated. Object velocities for NEXT frame (N+1) are calculated.
 tick(): Frame is incremented to N+1
 [time passes]
 
@@ -23,7 +23,7 @@ Game loop timeline with AI movement, synchronous version:
 
 Frame is N
 draw(): current frame (N) is drawn
-tick(): player position is updated using the frame we just drew
+tick(): player velocity is updated using the frame we just drew
 tick(): object positions are updated
 tick(): Frame is incremented to N+1
 [time passes]
@@ -37,6 +37,6 @@ class Agent {
   movementTargetForState(state) {
     // move in a random direction
     const direction = Math.random() * Math.PI * 2;
-    return new Point(this.maxSpeed * Math.cos(direction), this.maxSpeed * Math.sin(direction));
+    return new Point(this.maxSpeed * Math.cos(direction) + state.playerObject.x, this.maxSpeed * Math.sin(direction) + state.playerObject.y);
   }
 }

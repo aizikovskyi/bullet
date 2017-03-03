@@ -116,7 +116,7 @@ class VideoEngine {
     if (this.useCanvas) {
       this.context.textAlign = 'left';
       this.context.font = '3px Arial';
-      this.context.fillStyle = 'white';
+      this.context.fillStyle = 'yellow';
       this.context.fillText(text, 1, 4);
     }
   }
@@ -125,7 +125,7 @@ class VideoEngine {
     if (this.useCanvas) {
       this.context.textAlign = 'right';
       this.context.font = '3px Arial';
-      this.context.fillStyle = 'white';
+      this.context.fillStyle = 'yellow';
       this.context.fillText(text, 99, 4);
     }
   }
@@ -177,6 +177,15 @@ class VideoEngine {
 
         this.context.restore();
       }
+
+      // Debug only: display the buffer on the main canvas
+      if (this.compositeFrameBuffer) {
+        this.context.save();
+        this.context.setTransform(1, 0, 0, 1, 0, 0);
+        this.context.scale(1 / this.frameBufferScaleFactor, 1 / this.frameBufferScaleFactor);
+        this.context.drawImage(this.compositeFrameBuffer, 0, 10);
+        this.context.restore();
+      }
     }  // if (this.useCanvas)
 
     if (this.useBuffers) {
@@ -208,15 +217,6 @@ class VideoEngine {
 
       // At the very end, increment buffer counter
       this.currBufferIndex = (this.currBufferIndex + 1) % this.numBuffers;
-
-      // Debug only: display the buffer on the main canvas
-      if (this.useCanvas) {
-        this.context.save();
-        this.context.setTransform(1, 0, 0, 1, 0, 0);
-        this.context.scale(1 / this.frameBufferScaleFactor, 1 / this.frameBufferScaleFactor);
-        this.context.drawImage(this.compositeFrameBuffer, 0, 0);
-        this.context.restore();
-      }
     } // if (this.useBuffers)
   }
 
