@@ -11,6 +11,7 @@ class GameController {
     this.gameState = null;
     this.stageController = null;
     this.mainLoopInterval = null;
+    this.resetRandom();
     this.canvasInputEngine.callbacks.moveTowards = (point) => {
       if (this.playerRespondsToInput()) {
         this.gameState.playerInput.movementActive = true;
@@ -37,7 +38,7 @@ class GameController {
       lastFrameDate: Date.now(),
       status: 'running',        // 'running', 'paused', 'finished'
       playerStatus: 'alive',    // 'alive', 'dead', 'invulnerable', 'disabled'
-      playerType: 'human',      // 'human', 'agent', 'recall'
+      playerType: 'human',      // 'human', 'agent', 'recording'
       playerInput: {
         movementTarget: null,
         movementActive: false,
@@ -45,6 +46,14 @@ class GameController {
       eventListeners: {},
     };
     return gameState;
+  }
+
+  resetRandom(seed) {
+    // Pass null for a random seed
+    Math.seedrandom(seed, { pass: (prng, seed) => {
+      this.random = prng;
+      this.randomSeed = seed;
+    }});
   }
 
   startGame() {
@@ -55,18 +64,27 @@ class GameController {
     const startGameItem = MenuEngine.menuItem('START GAME', true, () => {
       this.startStage('human');
     });
-    this.menuEngine.showMenu([fullscreenItem, startGameItem]);
+    const startDemoItem = MenuEngine.menuItem('START DEMO', true, () => {
+      this.startStage('agent');
+    });
+    this.menuEngine.showMenu([fullscreenItem, startGameItem, startDemoItem]);
   }
 
   startStage(playerType) {
     this.fullStop();
-    this.randomSeed = Math.seedrandom();
+    if (playerType === 'recording') {
+      this.resetRandom(this.randomSeed);
+    }
+    else {
+      this.resetRandom();
+    }
     this.gameState = GameController.emptyGameState();
     this.gameState.playerType = playerType;
-    this.stageController = new EndlessStageController(60);
+    this.stageController = new EndlessStageController(60, this.random);
     this.videoEngine.clearCanvas();
     if (playerType === 'agent') {
       this.videoEngine.resetFrameBufferCounters();
+      this.agent.startRecording();
     }
     this.existingHighScore = this.highScore;
 
@@ -95,11 +113,12 @@ class GameController {
     if (this.gameState.status === 'finished' && this.mainLoopInterval !== null) {
       window.clearInterval(this.mainLoopInterval);
       this.mainLoopInterval = null;
-      if (this.gameState.playerStatus === 'dead') {
-        this.startGame();
+      if (this.gameState.playerType === 'agent') {
+        // Debug: insta-replay
+        this.startStage('recording');
       }
       else {
-        this.startStage(1);
+        this.startGame();
       }
     }
     this.tick();
@@ -150,8 +169,8 @@ class GameController {
       };
       this.gameState.playerObject.moveTowards(this.agent.movementTargetForState(state));
     }
-    else if (this.gameState.playerType === 'recall') {
-      // ...
+    else if (this.gameState.playerType === 'recording') {
+      this.gameState.playerObject.moveTowards(this.agent.recordedMovementTargetForFrame(this.gameState.frame));
     }
 
     // Then, for each enemy object:

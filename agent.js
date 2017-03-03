@@ -33,10 +33,25 @@ tick(): Frame is incremented to N+1
 class Agent {
   constructor() {
     this.maxSpeed = 1.0;
+    this.recording = [];
   }
   movementTargetForState(state) {
     // move in a random direction
     const direction = Math.random() * Math.PI * 2;
-    return new Point(this.maxSpeed * Math.cos(direction) + state.playerObject.x, this.maxSpeed * Math.sin(direction) + state.playerObject.y);
+    const target = new Point(this.maxSpeed * Math.cos(direction) + state.playerObject.x, this.maxSpeed * Math.sin(direction) + state.playerObject.y);
+    this.recording.push(target);
+    return target;
+  }
+
+  recordedMovementTargetForFrame(frame) {
+    if (this.recording.length > frame) {
+      return this.recording[frame];
+    }
+    console.log('Some huge error has occured! Please debug!');
+    return new Point(0, 0);
+  }
+
+  startRecording() {
+    this.recording = [];
   }
 }
